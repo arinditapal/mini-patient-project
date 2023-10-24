@@ -1,43 +1,72 @@
-const patientList = document.querySelector('.patientList');
+console.log("> frontend: Patient app start");
 
-async function printPatients () {
-    patientList.innerHTML = '';
+const patientForm = document.querySelector(".patientForm");
+const patientList = document.querySelector(".patientList");
 
-    const patients = await fetch( 'http://localhost:3000/api/patients/' ).then(res => res.json());
+async function handlePatientPrint() {
+    if(patientList)
+    patientList.innerHTML = "";
     
+    const patients = await fetch("/api/patients").then(res => res.json());
 
-    patients.forEach( patient => {
-        console.log(patient);
+    console.log(patients);
 
-        let patientRecord = document.createElement('li');
-        let name = document.createElement('span');
-        let diagnosis = document.createElement('div');
-        let address = document.createElement('address');
-        let button = document.createElement('button');
+    patients.forEach(patient => {
+        const patientRecord = document.createElement('li');
+        const patientName = document.createElement('div');
+        const patientDiagnosis = document.createElement('div');
+        const patientAddress = document.createElement('address');
+        const patientDeleteButton = document.createElement('button');
 
-        name.textContent = patient.name;
-        diagnosis.textContent = patient.diagnosis;
-        address.textContent = patient.address;
+        patientName.textContent = patient.name;
+        patientDiagnosis.textContent = patient.diagnosis;
+        patientAddress.textContent = patient.address;
+        patientDeleteButton.textContent = '❌';
+        
+        patientDeleteButton.style.cursor = "pointer";
 
-        // console.table([name.textContent, diagnosis.textContent, address.textContent]);
+        patientDeleteButton.addEventListener("click", () => {
+            fetch(`/api/patients/${patient.id}`, {
+                method: "DELETE"
+            })
+              .then(res => handlePatientPrint())
+              .catch(err => console.log(err));
+        })
+        
+        patientRecord.appendChild(patientName);
+        patientRecord.appendChild(patientDiagnosis);
+        patientRecord.appendChild(patientAddress);
+        patientRecord.appendChild(patientDeleteButton);
 
-        button.addEventListener('click', () => {
-            const url = `/api/patients/${patient.id}`;
-            fetch( url, {
-                method: 'DELETE'
-            } )
-                .then(res => printPatients())
-                .catch(err => console.log(err.message));
-        });
+        patientList?.appendChild(patientRecord);
+    })
+}
 
-        patientRecord.appendChild(name);
-        patientRecord.appendChild(diagnosis);
-        patientRecord.appendChild(address);
-        patientRecord.appendChild(button);
 
-        patientList.appendChild(patientRecord);
+handlePatientPrint()
+
+if (patientForm) {
+    patientForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const newPatientData = {
+            name: patientForm.name.value,
+            diagnosis: patientForm.diagnosis.value,
+            address: patientForm.address.value
+        }
+
+        console.log(newPatientData);
+
+        fetch("/api/patients", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newPatientData)
+
+        })
+            .then(res => handlePatientPrint())
+            .catch(err => console.log(err.message));
 
     });
-};
-
-printPatients();
+}
