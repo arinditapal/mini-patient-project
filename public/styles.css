@@ -1,0 +1,14 @@
+.patientItem {
+    display: flex;
+    width: 70%;
+    border-bottom: 1px solid black;
+}
+
+.patientItem div, address {
+    width: 30%;
+    padding: 4px;
+}
+
+.patientItem button {
+    width: 5%;
+}
