@@ -3,13 +3,25 @@ console.log("> frontend: Patient app start");
 const patientForm = document.querySelector(".patientForm");
 const patientList = document.querySelector(".patientList");
 
+/**
+ * Defining Patient type
+ * @typedef {{id: number, name: string, diagnosis: string | null, address: string}} Patient
+ */
+
 async function handlePatientPrint() {
-    if(patientList)
-    patientList.innerHTML = "";
+    if(!patientList) return;
+
+    patientList.innerHTML = `<li class="patientItem" style="font-weight: bold;">
+        <div>Name</div>
+        <div>Diagnosis</div>
+        <div>Address</div>
+    </li>`
     
+    /** @type {Patient[]} */
     const patients = await fetch("/api/patients").then(res => res.json());
 
     console.log(patients);
+
 
     patients.forEach(patient => {
         const patientRecord = document.createElement('li');
@@ -24,6 +36,8 @@ async function handlePatientPrint() {
         patientDeleteButton.textContent = '❌';
         
         patientDeleteButton.style.cursor = "pointer";
+        patientDeleteButton.style.backgroundColor = "none";
+        patientDeleteButton.style.border = "none";
 
         patientDeleteButton.addEventListener("click", () => {
             fetch(`/api/patients/${patient.id}`, {
@@ -37,6 +51,7 @@ async function handlePatientPrint() {
         patientRecord.appendChild(patientDiagnosis);
         patientRecord.appendChild(patientAddress);
         patientRecord.appendChild(patientDeleteButton);
+        patientRecord.classList.add("patientItem");
 
         patientList?.appendChild(patientRecord);
     })
